@@ -51,9 +51,16 @@ def main():
         else:
             break
     # 保存结果到本地
-    with open('data.json', 'w', encoding='utf-8') as f:
+    with open('./img/data.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(datalist, ensure_ascii=False, indent=4))
         f.flush()
+    # 抓取图片
+    for i in range(len(datalist)):
+        print(i)
+        r = requests.get('http:' + datalist[i])
+        with open('./img/%d.jpg' % i, 'wb') as f:
+            f.write(r.content)
+            f.flush()
 
 
 if __name__ == '__main__':
