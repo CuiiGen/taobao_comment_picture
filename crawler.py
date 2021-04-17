@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import _thread
 import json
 from logging import info
 from time import time
@@ -75,3 +76,14 @@ class crawler:
             with open('./img/%d.jpg' % i, 'wb') as f:
                 f.write(r.content)
                 f.flush()
+
+    def __temp(self, i):
+        info('progress: %d/%d' % (i, len(self.datalist) - 1))
+        r = requests.get('http:' + self.datalist[i])
+        with open('./img/%d.jpg' % i, 'wb') as f:
+            f.write(r.content)
+            f.flush()
+
+    def download_multithread(self):
+        for i in range(len(self.datalist)):
+            _thread.start_new_thread(self.__temp, (i,))
