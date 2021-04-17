@@ -51,12 +51,16 @@ class crawler:
             # 判断结果
             info('page size: \t%d' % len(ratelist))
             if len(ratelist) > 0:
+                t = []
                 for i in ratelist:
-                    self.datalist.extend(i.get('pics'))
+                    t.extend(i.get('pics'))
                     # 追加评论
                     if i.get('appendComment') is not None:
-                        self.datalist.extend(
+                        t.extend(
                             i.get('appendComment').get('pics'))
+                self.datalist.extend(t)
+                _thread.start_new_thread(
+                    self.__download_multithread, (t, page))
                 page += 1
             else:
                 break
@@ -68,22 +72,14 @@ class crawler:
             f.flush()
         info('file destination: %s' % path)
 
-    def download(self):
-        # 抓取图片
-        for i in range(len(self.datalist)):
-            info('progress: %d/%d' % (i, len(self.datalist) - 1))
-            r = requests.get('http:' + self.datalist[i])
-            with open('./img/%d.jpg' % i, 'wb') as f:
-                f.write(r.content)
-                f.flush()
-
-    def __temp(self, i):
-        info('progress: %d/%d' % (i, len(self.datalist) - 1))
-        r = requests.get('http:' + self.datalist[i])
-        with open('./img/%d.jpg' % i, 'wb') as f:
+    def __download_subtread(self, i, j, img_url):
+        r = requests.get('http:' + img_url)
+        with open('./img/%d_%d.jpg' % (i, j), 'wb') as f:
             f.write(r.content)
             f.flush()
 
-    def download_multithread(self):
-        for i in range(len(self.datalist)):
-            _thread.start_new_thread(self.__temp, (i,))
+    def __download_multithread(self, sublist, page):
+        for i in range(len(sublist)):
+            info('progress: %d/%d' % (i, len(sublist) - 1))
+            _thread.start_new_thread(
+                self.__download_subtread, (page, i, sublist[i]))
