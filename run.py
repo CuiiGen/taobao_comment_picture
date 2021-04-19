@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from time import sleep
 
 from crawler import crawler
 
@@ -13,6 +14,8 @@ logging.basicConfig(
 def main():
     c = crawler()
     c.run()
+    # 等待进程结束
+    sleep(10)
     c.save('./data.json')
 
 
