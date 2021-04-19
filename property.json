@@ -2,5 +2,7 @@
     "itemId": "",
     "spuId": "",
     "sellerId": "",
+    "auctionNumId": "",
+    "userNumId": "",
     "cookie": ""
 }
