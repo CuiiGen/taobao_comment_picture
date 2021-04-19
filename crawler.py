@@ -9,29 +9,47 @@ import requests
 
 
 class crawler:
-    def __init__(self):
+    def __init__(self, category):
+        # 类别
+        self.__cate = category
         # 基本URL
-        self.__url = 'https://rate.tmall.com/list_detail_rate.htm'
+        self.__url = {'tmall': 'https://rate.tmall.com/list_detail_rate.htm',
+                      'taobao': 'https://rate.taobao.com/feedRateList.htm'}
         # 配置文件
         conf = {}
         with open('property.json', 'r') as f:
             conf = json.loads(f.read())
         # 查询参数
         self.__params = {
-            'itemId': conf.get('itemId'),
-            'spuId': conf.get('spuId'),
-            'sellerId': conf.get('sellerId'),
-            'order': '3',
-            'append': '0',
-            'content': '1',
-            'picture': '1',
-            'needFold': '0',
-            '_ksTS': '%d_0000' % time(),
-            'callback': '_'
-        }
+            'tmall': {
+                'itemId': conf.get('itemId'),
+                'spuId': conf.get('spuId'),
+                'sellerId': conf.get('sellerId'),
+                'order': 3,
+                'append': 0,
+                'content': 1,
+                'picture': 1,
+                'needFold': 0,
+                '_ksTS': '%d_0000' % time(),
+                'callback': '_'
+            },
+            'taobao': {
+                'auctionNumId': conf.get('auctionNumId'),
+                'userNumId': conf.get('userNumId'),
+                'currentPageNum': 1,
+                'pageSize': 20,
+                'rateType': 3,
+                'orderType': 'sort_weight',
+                'hasSku': False,
+                'folded': 0,
+                '_ksTS': '%d_0000' % time(),
+                'callback': '_'
+            }}
         # 请求头
+        dictheader = {'tmall': 'https://detail.tmall.com/item.htm',
+                      'taobao': 'https://item.taobao.com/item.htm'}
         self.__headers = {
-            'referer': 'https://detail.tmall.com/item.htm',
+            'referer': dictheader[self.__cate],
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36',
             'cookie': conf.get('cookie')
         }
@@ -42,15 +60,16 @@ class crawler:
         if not path.exists(dirs):
             makedirs(dirs)
 
-    def __run_page(self, page):
+    def __run_page_tmall(self, page):
         '''
         子线程中启动运行该函数
 
         用于多线程爬取第page个页面信息
         '''
         info('page start: %2d' % page)
-        self.__params['currentPage'] = page
-        r = requests.get(self.__url, self.__params, headers=self.__headers)
+        self.__params[self.__cate]['currentPage'] = page
+        r = requests.get(
+            self.__url[self.__cate], self.__params[self.__cate], headers=self.__headers)
         r.encoding = 'utf-8'
         # 解析结果
         detail = json.loads(r.text[4:len(r.text)-1])
@@ -69,20 +88,51 @@ class crawler:
         _thread.start_new_thread(
             self.__download_multithread, (t, page))
 
-    def run(self):
+    def run_tmall(self):
         '''
         运行爬虫程序
         '''
         page = 1
-        self.__params['currentPage'] = page
-        r = requests.get(self.__url, self.__params, headers=self.__headers)
+        self.__params[self.__cate]['currentPage'] = page
+        r = requests.get(
+            self.__url[self.__cate], self.__params[self.__cate], headers=self.__headers)
         r.encoding = 'utf-8'
         # 解析结果
         detail = json.loads(r.text[4:len(r.text)-1])
         lastpage = detail.get('rateDetail').get('paginator').get('lastPage')
         info('lastPage: %2d' % lastpage)
         for i in range(lastpage):
-            _thread.start_new_thread(self.__run_page, (i + 1,))
+            _thread.start_new_thread(self.__run_page_tmall, (i + 1,))
+
+    def __run_page_taobao(self, page):
+        info('page start: %2d' % page)
+        self.__params[self.__cate]['currentPage'] = page
+        r = requests.get(
+            self.__url[self.__cate], self.__params[self.__cate], headers=self.__headers)
+        r.encoding = 'utf-8'
+        # 解析结果
+        detail = json.loads(r.text[4:len(r.text)-2])
+        ratelist = detail.get('comments')
+        # 判断结果
+        info('page: %2d \t size: %2d' % (page, len(ratelist)))
+        # 图片列表
+        t = []
+        for i in ratelist:
+            t.extend([j.get('thumbnail') for j in i.get('photos')])
+        self.__datalist.extend(t)
+        # _thread.start_new_thread(
+        #     self.__download_multithread, (t, page))
+
+    def run_taobao(self):
+        page = 1
+        self.__params[self.__cate]['currentPage'] = page
+        r = requests.get(
+            self.__url[self.__cate], self.__params[self.__cate], headers=self.__headers)
+        r.encoding = 'utf-8'
+        detail = json.loads(r.text[4:len(r.text)-2])
+        lastpage = detail.get('maxPage')
+        for i in range(lastpage):
+            _thread.start_new_thread(self.__run_page_taobao, (i + 1,))
 
     def save(self, path):
         '''
