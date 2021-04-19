@@ -16,7 +16,7 @@
 
 - 在电脑端浏览器登录淘宝/天猫，打开待爬取商品的评论区，并通过浏览器的检查功能查看评论查询URL及相关请求头信息，详细操作见下图所示；
 
-  <img src="./gif/temp.gif" style="zoom:80%;" />
+  <img src="https://github.com/CuiiGen/taobao_comment_picture/raw/main/gif/temp.gif" style="zoom:80%;" />
 
 - 根据上一步操作中查询得到的信息进一步正确修改配置文件`property.json`，其中字段`itemId`、`spuId`和`sellerId`仅用于天猫平台，字段`auctionNumId`和`userNumId`仅用于淘宝平台，`cookie`用于进行身份验证；
 
