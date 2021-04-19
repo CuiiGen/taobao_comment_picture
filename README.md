@@ -14,7 +14,7 @@
 
 - 正式运行前请保证本地Python开发环境的正确安装与配置；
 
-- 在电脑端浏览器登录淘宝/天猫，打开待爬取商品的评论区，并通过浏览器的检查功能查看评论查询URL及相关请求头信息，详细操作见下图所示；
+- 在电脑端浏览器登录淘宝/天猫，打开待爬取商品的评论区，并通过浏览器的检查功能查看评论查询URL及相关请求头信息，详细操作见下图所示，注意天猫平台的URL类似为`list_detail_rate.htm?...`，而淘宝平台URL类似为`feedRateList.htm?...`
 
   <img src="https://github.com/CuiiGen/taobao_comment_picture/raw/main/gif/temp.gif" style="zoom:80%;" />
 
