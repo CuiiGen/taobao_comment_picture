@@ -2,7 +2,7 @@
 import logging
 from time import sleep
 
-from crawler import crawler
+import crawler
 
 # 配置logging模块
 logging.basicConfig(
@@ -12,9 +12,9 @@ logging.basicConfig(
 
 
 def main():
-    c = crawler()
+    c = crawler.crawler(crawler.REFER_TAOBAO)
     c.run()
-    # 等待进程结束
+    # # 等待进程结束
     sleep(10)
     c.save('./data.json')
 
