@@ -13,6 +13,11 @@ REFER_TAOBAO = 1
 
 class crawler:
     def __init__(self, category):
+        '''
+        构造函数
+
+        @category 表示待爬取商品平台属于淘宝还是天猫，可选REFER_TMALL或REFER_TAOBAO
+        '''
         # 类别
         self.__cate = category
         # 基本URL
